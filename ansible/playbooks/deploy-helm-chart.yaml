@@ -1,0 +1,43 @@
+---
+- hosts: localhost
+  connection: local
+  vars:
+    helm_namespace: "ansible-helm-jenkins-demo"
+    helm_release_name: "ansible-helm-jenkins-demo"
+    helm_version: "v3.2.3"
+    helm_binary_directory: /tmp/helm
+    helm_archive_name: "helm-{{ helm_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
+    helm_binary: "{{ helm_binary_directory}}/{{ ansible_system | lower }}-amd64/helm"
+
+  tasks:
+    - name: Init Helm folders
+      file:
+        path: "{{ helm_binary_directory }}"
+        state: directory
+
+    - name: Check if Helm Binary Present
+      stat:
+        path: "{{ helm_binary }}"
+      register: helm_binary_present
+
+    - name: Unarchive Helm binary
+      unarchive:
+        src: "https://get.helm.sh/{{ helm_archive_name }}"
+        dest: "{{ helm_binary_directory }}"
+        remote_src: yes
+      when: not helm_binary_present.stat.exists
+
+    - name: Create Helm Namespace
+      community.kubernetes.k8s:
+        name: "{{ helm_namespace }}"
+        api_version: v1
+        kind: Namespace
+        state: present
+
+    - name: Deploy Helm Chart
+      community.kubernetes.helm:
+        name: "{{ helm_release_name }}"
+        chart_ref: "{{ playbook_dir }}/../../helm/ansible-helm-jenkins-demo"
+        release_namespace: "{{ helm_namespace }}"
+        binary_path: "{{ helm_binary }}"
+        values: "{{ chart_values | default({}) }}"

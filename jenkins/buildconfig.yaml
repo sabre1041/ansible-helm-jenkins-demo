@@ -1,0 +1,56 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: ansible-helm-jenkins-demo-template
+objects:
+  - apiVersion: v1
+    kind: "BuildConfig"
+    metadata:
+      name: "${APPLICATION_NAME}"
+    spec:
+      source:
+        git:
+          uri: "${SOURCE_REPOSITORY_URL}"
+          ref: "${SOURCE_REPOSITORY_REF}"
+      strategy:
+        type: JenkinsPipeline
+        jenkinsPipelineStrategy:
+          jenkinsfilePath: jenkins/Jenkinsfile
+          env:
+            - name: "TOWER_INSTANCE"
+              value: "${TOWER_INSTANCE}"
+            - name: "JOB_TEMPLATE_NAME"
+              value: "${JOB_TEMPLATE_NAME}"
+            - name: "CUSTOM_VAR"
+              value: "${CUSTOM_VAR}"
+parameters:
+  - description: The name for the application.
+    displayName: Application Name
+    name: APPLICATION_NAME
+    required: true
+    value: ansible-helm-jenkins-demo-pipeline
+  - description: The URL of the repository with your application source code.
+    displayName: Git Repository URL
+    name: SOURCE_REPOSITORY_URL
+    required: true
+    value: https://github.com/sabre1041/ansible-helm-jenkins-demo.git
+  - name: SOURCE_REPOSITORY_REF
+    description:
+      Set this to a branch name, tag or other ref of your repository if you
+      are not using the default branch.
+    displayName: Git Reference
+    value: master
+  - name: TOWER_INSTANCE
+    description: Name of the Ansible Tower reference for the Jenkins instance
+    displayName: Ansible Tower Reference
+    value: tower
+    required: true
+  - name: JOB_TEMPLATE_NAME
+    description: Name of the Ansible tower Job Template
+    displayName: Ansible Job Template Name
+    required: true
+    value: "Deploy Helm Chart"
+  - name: CUSTOM_VAR
+    description: Custom environment variable passed to the Helm Chart
+    displayName: Custom Variable
+    value: ""

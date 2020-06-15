@@ -1,0 +1,25 @@
+pipeline {
+	agent any
+	
+	stages {
+	
+		stage('Call Ansible Tower') {
+			steps {
+				ansibleTower(
+					towerServer: "${TOWER_INSTANCE}",
+					templateType: 'Job',
+					jobTemplate: "${JOB_TEMPLATE_NAME}",
+					importTowerLogs: true,
+					jobTags: '',
+					limit: '',
+					removeColor: false,
+					verbose: true,
+					extraVars: '''---
+chart_values:
+  customEnvVar: ${CUSTOM_VAR}'''
+
+				)
+			}
+		}
+	}
+}

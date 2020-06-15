@@ -1,0 +1,17 @@
+{{- $fullName := include "ansible-helm-jenkins-demo.fullname" . -}}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ $fullName }}
+  labels:
+    {{- include "ansible-helm-jenkins-demo.labels" . | nindent 4 }}
+spec:
+  port:
+    targetPort: {{ .Values.service.port }}
+  to:
+    kind: Service
+    name: {{ $fullName }}
+    weight: 100
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
