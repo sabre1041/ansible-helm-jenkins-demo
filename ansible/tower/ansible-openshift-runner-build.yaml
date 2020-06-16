@@ -1,0 +1,45 @@
+---
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: ansible-openshift-runner
+objects:
+  - apiVersion: v1
+    kind: ImageStream
+    metadata:
+      name: ${APPLICATION_NAME}
+  - apiVersion: v1
+    kind: BuildConfig
+    metadata:
+      name: ${APPLICATION_NAME}
+    spec:
+      output:
+        to:
+          kind: ImageStreamTag
+          name: ${APPLICATION_NAME}:latest
+      strategy:
+        type: Docker
+        dockerStrategy:
+          pullSecret:
+            name: ${PULL_SECRET}
+      source:
+        dockerfile: |-
+          FROM registry.redhat.io/ansible-tower-37/ansible-runner-rhel7
+          RUN curl -O https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
+              yum install -y epel-release-latest-7.noarch.rpm && \
+              rm -f epel-release-latest-7.noarch.rpm && \
+              yum install -y python-pip && \
+              pip install -U pip && \
+              pip install -U setuptools && \
+              pip install --ignore-installed ipaddress openshift kubernetes
+        type: Dockerfile
+parameters:
+  - description: The name for the application.
+    displayName: Application Name
+    name: APPLICATION_NAME
+    required: true
+    value: ansible-openshift-runner
+  - description: The name for the pull secret.
+    displayName: Pull Secret Name
+    name: PULL_SECRET
+    required: true
