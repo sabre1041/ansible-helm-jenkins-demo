@@ -96,7 +96,7 @@ Using the admin credentials specified during the installation, login to the Ansi
         args:
             - sleep
             - infinity
-      serviceAccount: tower-runner
+      serviceAccount: helm-tower-runner
     ```
     8. Click Save
 3. Create a new Project to retrieve assets from this repository
@@ -113,7 +113,8 @@ Using the admin credentials specified during the installation, login to the Ansi
     5. Select an inventory (The included _Demo Inventory_ that is provide by default will suffice)
     6. Select the project previously created
     7. Under _Instance Groups_, select the Container Group previously created
-    8. Click **Save**
+    8. Under _Extra Variables_, select **Prompt on Launch**
+    9. Click **Save**
 
 At this point, Ansible Tower has been configured
 
